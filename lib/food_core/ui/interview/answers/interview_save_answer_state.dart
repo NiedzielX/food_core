@@ -1,0 +1,4 @@
+enum InterviewSaveAnswerState {
+  IDLE,
+  SAVING
+}

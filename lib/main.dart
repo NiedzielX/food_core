@@ -1,50 +1,35 @@
-import 'package:easy_localization/easy_localization.dart';
+import 'package:connectivity_wrapper/connectivity_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:food_core/injection.dart';
-import 'package:food_core/view/routing/app_route.gr.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:food_core/food_core/model/theme_model.dart';
+import 'package:food_core/food_core/service/app_localizations.dart';
+import 'package:food_core/food_core/ui/splash/splash_component.dart';
+import 'package:food_core/food_core/utils/strings.dart';
+import 'package:provider/provider.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await EasyLocalization.ensureInitialized();
-
-  SystemChrome.setPreferredOrientations(
-    [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown],
-  );
-
-  configureDependencies();
-
-  runApp(
-    EasyLocalization(
-      supportedLocales: const [Locale('pl')],
-      path: 'assets/translations',
-      fallbackLocale: const Locale('pl'),
-      child: const FoodCoreApp(),
-    ),
-  );
+void main() {
+  SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(statusBarColor: Colors.transparent));
+  runApp(ChangeNotifierProvider<ThemeModel>(
+      create: (BuildContext context) => ThemeModel(), child: MyApp()));
 }
 
-final _appRouter = AppRouter();
-
-class FoodCoreApp extends StatelessWidget {
-  const FoodCoreApp({super.key});
-
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(
-      designSize: const Size(360, 812),
-      useInheritedMediaQuery: true,
-      builder: (_, child) => MaterialApp.router(
-        title: 'FoodCore',
-        debugShowCheckedModeBanner: false,
-        // theme: CustomThemeData.theme,
-        routerDelegate: _appRouter.delegate(),
-        routeInformationParser: _appRouter.defaultRouteParser(),
-        locale: context.locale,
-        supportedLocales: context.supportedLocales,
-        localizationsDelegates: context.localizationDelegates,
-      ),
-    );
+    return ConnectivityAppWrapper(
+        app: MaterialApp(
+      localizationsDelegates: [
+        AppLocalizationsDelegate(),
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      debugShowCheckedModeBanner: false,
+      title: Strings.appName,
+      theme: Provider.of<ThemeModel>(context).currentTheme,
+      home: SplashPage(),
+    ));
   }
 }
